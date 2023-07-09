@@ -6,15 +6,17 @@ import { Usuarios } from "./models/usuario.models.js";
 async function main() {
   try {
     await sequelize.sync({ force: false });
-
-    const [rol, createdRol] = await Rol.findOrCreate({
+    const roleNames = ["administrador", "escritor", "lector"];
+    for (let i = 0; i < roleNames.length; i++) {
+      await Rol.findOrCreate({
+        where: { rol: roleNames[i] },
+        defaults: { rol: roleNames[i] },
+      });
+    }
+    const adminRole = await Rol.findOne({
       where: { rol: "administrador" },
-      default: {
-        rol: "administrador",
-      },
+      attributes: ["id"],
     });
-    console.log(rol.rol, "\t", createdRol);
-    // const root = await Usuarios.create({ rolID: admi.id });
     const [user, created] = await Usuarios.findOrCreate({
       where: { correo: "root@root" },
       defaults: {
@@ -22,7 +24,7 @@ async function main() {
         apellido: "root",
         correo: "root@root",
         password: "root",
-        rolID: rol.id,
+        rolID: adminRole.id,
       },
     });
 
