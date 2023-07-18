@@ -194,27 +194,12 @@ export const BorrarNota = async (req, res) => {
 };
 
 export const Nota = async (req, res) => {
-  const t = await sequelize.transaction();
   try {
     const id = req.params.id;
     console.log(id, " id ", req.params.id);
+
     const noticia = await Noticia.findOne({
       where: { id },
-      include: [{ model: Items }],
-      transaction: t,
-    });
-    await t.commit();
-    return res.status(200).json({ message: noticia });
-  } catch (error) {
-    console.log("error ", error);
-    await t.rollback();
-    return res.status(500).json({ message: "error servidor" });
-  }
-};
-
-export const Notas = async (req, res) => {
-  try {
-    const noticia = await Noticia.findAll({
       include: [
         { model: Items },
         { model: Categoria },
@@ -222,12 +207,35 @@ export const Notas = async (req, res) => {
         { model: Comentario },
       ],
     });
-    return res.status(200).json({ noticia });
+
+    if (noticia) {
+      return res.status(200).json({ message: noticia });
+    } else {
+      return res.status(404).json({ message: "Noticia no encontrada" });
+    }
   } catch (error) {
-    console.log("error", error);
-    return res.status(404).json({ error: error.json });
+    console.log("error ", error);
+    return res.status(500).json({ message: "Error del servidor" });
   }
 };
+
+export const Notas = async (req, res) => {
+  try {
+    const noticias = await Noticia.findAll({
+      include: [
+        { model: Items },
+        { model: Categoria },
+        { model: SubCategoria },
+        { model: Comentario },
+      ],
+    });
+    return res.status(200).json({ noticias });
+  } catch (error) {
+    console.log("error", error);
+    return res.status(500).json({ message: "Error del servidor" });
+  }
+};
+
 
 export const VerNotaEscritor = async (req, res) => {
   try {

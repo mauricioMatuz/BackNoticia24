@@ -60,7 +60,7 @@ router.post(
   cors(),
   CrearNota
 );
-router.get("/api/noticia", cors(), Notas);
+router.get("/api/noticias",verifyToken, cors(), Notas);
 router.put("/api/actualizar/nota", verifyToken, cors(), ActualizarNota);
 router.post(
   "/api/actualizar/imagen",

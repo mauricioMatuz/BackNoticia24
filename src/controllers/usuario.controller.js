@@ -33,7 +33,7 @@ export const RegistrarAdministrador = async (req, res) => {
   try {
     console.log("ENTRO A REGISTER");
     const { nombre, apellido, correo, password, rolID } = req.body;
-    console.log("ROLID ",rolID)
+    console.log("ROLID ", rolID);
     await sequelize.transaction(async (t) => {
       const banderaToken = jwt.verify(req.token, "administrador");
       if (!banderaToken) {
@@ -121,7 +121,7 @@ export const Login = async (req, res) => {
 
     if (!usuario) {
       console.log("NULL null");
-      return res.status(401).json({ message: "Credenciales inválidas" });
+      return res.status(401).json({ message: "No hay usuario" });
     }
 
     let secretKey;
