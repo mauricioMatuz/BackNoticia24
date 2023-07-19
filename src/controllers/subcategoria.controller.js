@@ -7,12 +7,10 @@ import jwt from "jsonwebtoken";
 export const CrearSubCategoria = async (req, res) => {
   try {
     const { subcategoria } = req.body;
-    console.log(subcategoria, " esto viene de front ");
     const decodedToken = jwt.verify(req.token, "administrador");
     await SubCategoria.create({ subcategoria });
     return res.status(201).json({ message: "Subcategoría creada" });
   } catch (error) {
-    console.log("error", error);
     return res.status(500).json({ message: "ERROR SERVIDOR" });
   }
 };
@@ -21,7 +19,6 @@ export const ActulizarSubCategoria = async (req, res) => {
   const t = await sequelize.transaction();
   try {
     const { id } = req.body;
-    console.log("SI ENTRA ",id)
     try {
       const decodedToken = jwt.verify(req.token, "administrador");
     } catch (error) {
@@ -65,7 +62,6 @@ export const BorrarSubCategoria = async (req, res) => {
 export const SubCategorias = async (req, res) => {
   try {
     const decodedToken = jwt.verify(req.token, "administrador");
-    console.log(req.token);
     const subcategoria = await SubCategoria.findAll({ order: [["id", "ASC"]] });
     return res.status(200).json({ subcategoria });
   } catch (error) {
