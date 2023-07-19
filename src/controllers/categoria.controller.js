@@ -7,16 +7,14 @@ export const CrearCategoria = async (req, res) => {
   const t = await sequelize.transaction();
   try {
     const { Nuevacategoria } = req.body;
-
     // Verificar el token y manejar errores si no es válido
     try {
       const decodedToken = jwt.verify(req.token, "administrador");
       // Aquí podrías hacer más comprobaciones con el token si es necesario
     } catch (error) {
-      return res.status(400).json({ message: "Token inválido" });
+      return res.status(401).json({ message: "Token inválido" });
     }
 
-    console.log(Nuevacategoria, " Nuevacategoria ", req.body);
     await Categoria.create({
       categoria: Nuevacategoria,
     });
@@ -24,58 +22,62 @@ export const CrearCategoria = async (req, res) => {
     return res.status(200).json({ message: "Categoria creada" });
   } catch (error) {
     await t.rollback();
-    console.log("error ", error);
     return res.status(500).json({ message: "Error en el servidor" });
   }
 };
-
 export const ActualizarCategoria = async (req, res) => {
   const t = await sequelize.transaction();
   try {
     const { id } = req.body;
-    const decodedToken = jwt.verify(req.token, "administrador");
+    try {
+      const decodedToken = jwt.verify(req.token, "administrador");
+    } catch (error) {
+      return res.status(401).json({ message: "Token inválido" });
+    }
     const categoria = await Categoria.findOne({
       where: { id },
     });
     if (categoria) {
-      categoria.set(req.body);
-      await categoria.save();
+      await categoria.update(req.body);
       await t.commit();
-      return res.status(200).json({ message: "Categoria actualizado" });
+      return res
+        .status(200)
+        .json({ message: "Categoría actualizada exitosamente" });
     } else {
-      return res.status(404).json({ message: "Categoria no encontrado" });
+      return res.status(404).json({ message: "Categoría no encontrada" });
     }
   } catch (error) {
     await t.rollback();
-    return res.status(500).json({ message: "Error Servidor" });
+    return res.status(500).json({ message: "Error en el servidor" });
   }
 };
 
 export const BorrarCategoria = async (req, res) => {
-  const t = await sequelize.transaction();
   try {
-    const { id } = req.body;
-    const decodedToken = jwt.verify(req.token, "administrador");
-    const categoria = await Categoria.findOne({ where: { id } });
-    if (categoria) {
-      await Categoria.destroy({ where: { id } });
-      await t.commit();
-      return res.status(200).json({ message: "Categoria borrada" });
-    } else {
-      return res.status(200).json({ message: "No se encontro categoria" });
+    const { id } = req.params;
+    let decodedToken;
+    try {
+      decodedToken = jwt.verify(req.token, "administrador");
+    } catch (error) {
+      return res.status(401).json({ message: "Token inválido" });
     }
+
+    const categoria = await Categoria.findByPk(id);
+    if (!categoria) {
+      return res.status(404).json({ message: "No se encontró la categoría" });
+    }
+
+    await Categoria.destroy({ where: { id } });
+    return res.status(200).json({ message: "Categoría borrada exitosamente" });
   } catch (error) {
-    await t.rollback();
-    return res.status(500).json({ message: "Error servidor" });
+    console.error(error);
+    return res.status(500).json({ message: "Error en el servidor" });
   }
 };
 
 export const Categorias = async (req, res) => {
   try {
-    const categoria = await Categoria.findAll();
-    console.log(req.token, " esto es token :D");
-
-    // Verificar el token y manejar errores si no es válido
+    const categoria = await Categoria.findAll({ order: [["id", "ASC"]] });
     try {
       const decodedToken = jwt.verify(req.token, "administrador");
       // Aquí podrías hacer más comprobaciones con el token si es necesario
@@ -90,9 +92,7 @@ export const Categorias = async (req, res) => {
 };
 
 export const FindCategoria = async (req, res) => {
-  console.log("SIENTRO ACA WE");
   const { q } = req.query;
-  console.log(q);
   try {
     const categoria = await Categoria.findAll({
       where: {
@@ -101,6 +101,10 @@ export const FindCategoria = async (req, res) => {
         },
       },
     });
+
+    if (categoria.length === 0) {
+      return res.status(404).json({ message: "No se encontraron categorías" });
+    }
 
     try {
       const decodedToken = jwt.verify(req.token, "administrador");

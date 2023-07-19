@@ -13,7 +13,7 @@ const router = Router();
 //! Authorization: Bearer <token>
 
 router.get("/api/categorias", verifyToken, cors(), Categorias);
-router.get("/api/buscar",verifyToken,cors(),FindCategoria)
+router.get("/api/buscar", verifyToken, cors(), FindCategoria);
 router.post("/api/crear/categoria", verifyToken, cors(), CrearCategoria);
 router.put(
   "/api/actualizar/categoria",
@@ -21,5 +21,10 @@ router.put(
   cors(),
   ActualizarCategoria
 );
-router.delete("/api/borrar/categoria", verifyToken, cors(), BorrarCategoria);
+router.delete(
+  "/api/borrar/categoria/:id",
+  verifyToken,
+  cors(),
+  BorrarCategoria
+);
 export default router;
