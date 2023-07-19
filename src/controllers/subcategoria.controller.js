@@ -1,13 +1,16 @@
 import { sequelize } from "../database/database.js";
 import { SubCategoria } from "../models/subcategoria.models.js";
+import { Op } from "sequelize";
+
 import jwt from "jsonwebtoken";
 
 export const CrearSubCategoria = async (req, res) => {
   try {
     const { subcategoria } = req.body;
+    console.log(subcategoria, " esto viene de front ");
     const decodedToken = jwt.verify(req.token, "administrador");
-    const a = await SubCategoria.create({ subcategoria });
-    return res.status(200).json({ message: "SubCategoria creado", a });
+    await SubCategoria.create({ subcategoria });
+    return res.status(201).json({ message: "Subcategoría creada" });
   } catch (error) {
     console.log("error", error);
     return res.status(500).json({ message: "ERROR SERVIDOR" });
@@ -18,16 +21,22 @@ export const ActulizarSubCategoria = async (req, res) => {
   const t = await sequelize.transaction();
   try {
     const { id } = req.body;
-    const decodedToken = jwt.verify(req.token, "administrador");
-    const subcategoria = SubCategoria.findOne({ where: { id } });
-    if (subcategoria) {
-      subcategoria.set(req.body);
-      await subcategoria.save();
-    } else {
-      return res.status(200).json({ message: "No existe categoria" });
+    console.log("SI ENTRA ",id)
+    try {
+      const decodedToken = jwt.verify(req.token, "administrador");
+    } catch (error) {
+      return res.status(401).json({ message: "Token inválido" });
     }
-    await t.commit();
-    return res.status(200).json({ message: "Categoria actualizada" });
+    const subcategoria = await SubCategoria.findOne({ where: { id } });
+    if (subcategoria) {
+      await subcategoria.update(req.body);
+      await t.commit();
+      return res
+        .status(200)
+        .json({ message: "SubCategoría actualizada exitosamente" });
+    } else {
+      return res.status(404).json({ message: "SubCategoría no encontrada" });
+    }
   } catch (error) {
     await t.rollback();
     return res.status(500).json({ message: "ERROR SERVIDOR" });
@@ -37,27 +46,60 @@ export const ActulizarSubCategoria = async (req, res) => {
 export const BorrarSubCategoria = async (req, res) => {
   const t = await sequelize.transaction();
   try {
-    const { id } = req.body;
+    const { id } = req.params;
+
     const decodedToken = jwt.verify(req.token, "administrador");
     const subcategoria = await SubCategoria.findOne({ where: { id } });
-    if (subcategoria) {
-      await SubCategoria.destroy({ where: { id } });
-    } else {
-      return res.status(200).json({ message: "No existe subcategoria" });
+    if (!subcategoria) {
+      return res.status(404).json({ message: "No existe subcategoria" });
     }
+    await SubCategoria.destroy({ where: { id } });
     await t.commit();
-    return res.status(200).json({ message: "subCategoria borrada" });
+    return res.status(204).send();
   } catch (error) {
     await t.rollback();
-    return res.status(500).json({ message: "ERROR SERVIDOR" });
+    return res.status(500).json("ERROR SERVIDOR");
   }
 };
 
 export const SubCategorias = async (req, res) => {
   try {
-    const subcategoria = await SubCategoria.findAll();
+    const decodedToken = jwt.verify(req.token, "administrador");
+    console.log(req.token);
+    const subcategoria = await SubCategoria.findAll({ order: [["id", "ASC"]] });
     return res.status(200).json({ subcategoria });
   } catch (error) {
+    if (error instanceof jwt.JsonWebTokenError) {
+      return res.status(403).json({ message: "Token inválido" });
+    }
     return res.status(500).json({ message: "ERROR SERVIDOR" });
+  }
+};
+
+export const FindSubCategoria = async (req, res) => {
+  const { q } = req.query;
+  try {
+    const subcategoria = await SubCategoria.findAll({
+      where: {
+        subcategoria: {
+          [Op.like]: `%${q}%`,
+        },
+      },
+    });
+
+    if (subcategoria.length === 0) {
+      return res.status(404).json({ message: "No se encontraron categorías" });
+    }
+
+    try {
+      const decodedToken = jwt.verify(req.token, "administrador");
+      // Aquí podrías hacer más comprobaciones con el token si es necesario
+      return res.status(200).json({ subcategoria });
+    } catch (error) {
+      return res.status(401).json({ message: "Token inválido" });
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Error en el servidor" });
   }
 };

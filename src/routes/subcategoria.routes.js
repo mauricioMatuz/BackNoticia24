@@ -5,12 +5,14 @@ import {
   ActulizarSubCategoria,
   BorrarSubCategoria,
   CrearSubCategoria,
+  FindSubCategoria,
   SubCategorias,
 } from "../controllers/subcategoria.controller.js";
 
 const router = Router();
 
 router.get("/api/subcategoria", verifyToken, cors(), SubCategorias);
+router.get("/api/buscar/subcategoria", verifyToken, cors(), FindSubCategoria);
 router.post("/api/crear/subcategoria", verifyToken, cors(), CrearSubCategoria);
 router.put(
   "/api/actualizar/subcategoria",
@@ -19,7 +21,7 @@ router.put(
   ActulizarSubCategoria
 );
 router.delete(
-  "/api/borrar/subcategoria",
+  "/api/borrar/subcategoria/:id",
   verifyToken,
   cors(),
   BorrarSubCategoria
