@@ -70,7 +70,6 @@ export const BorrarCategoria = async (req, res) => {
     await Categoria.destroy({ where: { id } });
     return res.status(200).json({ message: "Categoría borrada exitosamente" });
   } catch (error) {
-    console.error(error);
     return res.status(500).json({ message: "Error en el servidor" });
   }
 };
@@ -86,7 +85,6 @@ export const Categorias = async (req, res) => {
       return res.status(401).json({ message: "Token inválido" });
     }
   } catch (error) {
-    console.error(error, " error categorias");
     return res.status(500).json({ message: "ERROR" });
   }
 };
@@ -114,7 +112,6 @@ export const FindCategoria = async (req, res) => {
       return res.status(401).json({ message: "Token inválido" });
     }
   } catch (error) {
-    console.error(error);
     res.status(500).json({ message: "Error en el servidor" });
   }
 };

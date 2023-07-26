@@ -1,11 +1,14 @@
 import { Router } from "express";
 import {
-  ActualizarImagen,
+  ActualizarImagenes,
   ActualizarNota,
   BorrarNota,
   CrearNota,
+  FindNotaTitulo,
+  ListImageNota,
   Nota,
   Notas,
+  VerNotaAdministrador,
   VerNotaEscritor,
 } from "../controllers/noticia.controller.js";
 import { verifyToken } from "../middleware/verifyToken.js";
@@ -39,36 +42,38 @@ let uploads = multer({
   },
 });
 
-// //! Authorization: Bearer <token>
-// function verifyToken(req, res, next) {
-//   const bearerHeader = req.headers["authorization"];
-//   if (typeof bearerHeader !== "undefined") {
-//     const bearerToken = bearerHeader.split(" ")[1];
-//     req.token = bearerToken;
-//     next();
-//   } else {
-//     res.sendStatus(403);
-//   }
-// }
-
 const router = Router();
 
 router.post(
   "/api/registrar/nota",
   verifyToken,
-  uploads.array("foto"),
+  uploads.array("images"),
   cors(),
   CrearNota
 );
-router.get("/api/noticias",verifyToken, cors(), Notas);
-router.put("/api/actualizar/nota", verifyToken, cors(), ActualizarNota);
-router.post(
+router.get("/api/noticias", cors(), Notas);
+router.put(
+  "/api/actualizr/nota",
+  verifyToken,
+  uploads.array("images"),
+  cors(),
+  ActualizarNota
+);
+router.put(
   "/api/actualizar/imagen",
   verifyToken,
-  uploads.array("foto"),
-  ActualizarImagen
+  uploads.array("images"),
+  ActualizarImagenes
 );
-router.delete("/api/borrar/noticia", cors(), verifyToken, BorrarNota);
+router.delete("/api/borrar/noticia/:id/:rol", cors(), verifyToken, BorrarNota);
 router.get("/api/noticia/:id", cors(), Nota);
 router.get("/api/noticias/escritor", verifyToken, cors(), VerNotaEscritor);
+// router.get(
+//   "/api/noticias/administrador",
+//   verifyToken,
+//   cors(),
+//   VerNotaAdministrador
+// );
+router.get("/api/buscar/nota", verifyToken, cors(), FindNotaTitulo);
+router.get("/api/images", cors(), verifyToken, ListImageNota);
 export default router;

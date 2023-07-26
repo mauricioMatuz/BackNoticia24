@@ -8,6 +8,7 @@ import { fileURLToPath } from "url";
 import { Categoria } from "../models/categoria.models.js";
 import { SubCategoria } from "../models/subcategoria.models.js";
 import { Comentario } from "../models/comentarios.models.js";
+import { Op } from "sequelize";
 
 const eliminarArchivos = (archivos) => {
   archivos.forEach((archivo) => {
@@ -19,6 +20,7 @@ export const CrearNota = async (req, res, next) => {
   const t = await sequelize.transaction();
   try {
     const files = req.files;
+    console.log("FILES ", req.files);
     const date = new Date();
     const meses = [
       "ENERO",
@@ -55,8 +57,9 @@ export const CrearNota = async (req, res, next) => {
     );
 
     if (!files) {
-      return res.status(400).json({ message: "extensión de archivo inválida" });
+      await t.rollback();
     } else {
+      console.log(files, " por que entro si llego vacio");
       await Promise.all(
         files.map(async (file) => {
           await Items.create(
@@ -72,14 +75,63 @@ export const CrearNota = async (req, res, next) => {
     }
 
     await t.commit();
-    return res
-      .status(200)
-      .json({ message: "nota creada", data: decodedToken.user });
+    return res.status(201).json({ message: "Nota creada" });
   } catch (error) {
     await t.rollback();
-    eliminarArchivos(req.files);
-    console.log(error, " este error");
-    return res.json({ message: "error" });
+    console.log("error ", error);
+    if (req.files) eliminarArchivos(req.files);
+    return res.status(500).json({ message: "Error del servidor" });
+  }
+};
+
+export const ListImageNota = async (req, res) => {
+  try {
+    const { id, rol } = req.body;
+    try {
+      const decodedToken = jwt.verify(req.token, rol);
+    } catch (error) {
+      return res.status(401).json({ message: "Token inválido" });
+    }
+    const noticia = await Noticia.findOne({ where: { id } });
+    if (!noticia) {
+      return res.status(404).json({ message: "No se encontró la nota" });
+    } else {
+      const item = await Items.findOne({ where: { noticiaID: id } });
+      return res.status(200).json({ message: item });
+    }
+  } catch (error) {}
+};
+
+export const ActualizarImagenes = async (req, res) => {
+  const t = await sequelize.transaction();
+  try {
+    const { id, rol } = req.body;
+    const files = req.files;
+    try {
+      const decodedToken = jwt.verify(req.token, rol);
+    } catch (error) {
+      return res.status(401).json({ message: "Token inválido" });
+    }
+    const noticia = await Noticia.findOne({ where: { id } });
+    if (!noticia) {
+      return res.status(404).json({ message: "No se encontró la nota" });
+    } else {
+      await Items.destroy({ where: { noticiaID: id }, transaction: t });
+      const newItems = files.map((file) => {
+        return {
+          nombre: file.originalname,
+          path: "http://localhost:8080/" + file.filename,
+          noticiaID: id,
+        };
+      });
+      await Items.bulkCreate(newItems, { transaction: t });
+      await t.commit();
+      return res.status(200).json({ message: "Imágenes actualizadas" });
+    }
+  } catch (error) {
+    await t.rollback();
+    console.log(error, " este es el error al actualizar las imágenes");
+    return res.status(500).json({ message: "Error del servidor" });
   }
 };
 
@@ -87,116 +139,72 @@ export const ActualizarNota = async (req, res) => {
   const t = await sequelize.transaction();
   try {
     const { id, rol } = req.body;
-    const decodedToken = jwt.verify(req.token, rol);
-    if (!decodedToken) {
-      return res.status(401).json({ message: "Token invalido" });
+    console.log("ID DE NOTA ", id, " rol ", rol);
+    const files = req.files;
+    try {
+      const decodedToken = jwt.verify(req.token, rol);
+    } catch (error) {
+      return res.status(401).json({ message: "Token inválido" });
     }
     const noticia = await Noticia.findOne({ where: { id } });
-    if (noticia == null) {
-      return res.status(404).json({ message: "No se encontro la nota" });
+    if (!noticia) {
+      return res.status(404).json({ message: "No se encontró la nota" });
     } else {
       noticia.set(req.body);
+
+      // Eliminar todas las imágenes asociadas a la nota
+      await Items.destroy({ where: { noticiaID: id }, transaction: t });
+
+      // Crear las nuevas imágenes
+      const newItems = files.map((file) => {
+        return {
+          nombre: file.originalname,
+          path: "http://localhost:8080/" + file.filename,
+          noticiaID: id,
+        };
+      });
+      await Items.bulkCreate(newItems, { transaction: t });
+
       await noticia.save();
     }
     await t.commit();
     return res.status(200).json({ message: "Nota actualizada" });
   } catch (error) {
     await t.rollback();
-    console.log(error, " error en catch");
-    return res.status(500).json({ message: "error servidor" });
-  }
-};
-
-export const ActualizarImagen = async (req, res) => {
-  const t = await sequelize.transaction();
-  try {
-    const { id, rol } = req.body;
-    const files = req.files;
-    const decodedToken = jwt.verify(req.token, rol);
-    const noticia = await Noticia.findOne({
-      where: { id },
-    });
-    if (!noticia) {
-      return res.status(404).json({ message: "Nota no encontrada" });
-    } else {
-      const CURRENT_DIR = dirname(fileURLToPath(import.meta.url));
-      const union = join(CURRENT_DIR, "../uploads");
-      const items = await Items.findAll({
-        where: {
-          noticiaID: id,
-        },
-      });
-
-      for (const item of items) {
-        const foto = item.path.replace("http://localhost:8080/", "");
-        const imgPath = join(union, "/", foto);
-        await Items.destroy({ where: { id: item.id } });
-        fs.unlinkSync(imgPath);
-      }
-
-      for (const file of files) {
-        await Items.create(
-          {
-            nombre: file.originalname,
-            path: "http://localhost:8080/" + file.filename,
-            noticiaID: id,
-          },
-          { transaction: t }
-        );
-      }
-    }
-    await t.commit();
-    return res.status(202).json({ message: "Imagenes actualizadas" });
-  } catch (error) {
-    console.log("error ", error, " <<<- try");
-    await t.rollback();
-    return res.status(401).json({ message: "Error Token" });
+    console.log(error, " este es el error al actualizar we");
+    return res.status(500).json({ message: "Error del servidor" });
   }
 };
 
 export const BorrarNota = async (req, res) => {
   const t = await sequelize.transaction();
   try {
-    const { id, rol } = req.body;
+    const { id, rol } = req.params;
     const token = req.headers.authorization;
-    if (!token) {
+    try {
+      jwt.verify(req.token, rol);
+    } catch (error) {
       return res.status(401).json({ message: "Se requiere autorización" });
     }
-    jwt.verify(req.token, rol);
+    console.log("id", id, "\nrol", rol);
     const noticia = await Noticia.findOne({ where: { id }, transaction: t });
     if (!noticia) {
       return res.status(404).json({ message: "Noticia no encontrada" });
     }
-    const CURRENT_DIR = dirname(fileURLToPath(import.meta.url));
-    const union = join(CURRENT_DIR, "../uploads");
-    const items = await Items.findAll({ where: { noticiaID: id } });
-
-    for (const item of items) {
-      const imgPath = path.join(
-        union,
-        "..",
-        "uploads",
-        item.path.replace("http://localhost:8080/", "")
-      );
-      fs.unlinkSync(imgPath);
-    }
-
-    await Items.destroy({ where: { noticiaID: id }, transaction: t });
     await Noticia.destroy({ where: { id }, transaction: t });
 
     await t.commit();
     return res.status(200).json({ message: "Noticia eliminada" });
   } catch (error) {
+    console.log("error error", error);
     await t.rollback();
-    console.log("error ", error);
-    return res.status(401).json({ message: "Error token" });
+    return res.status(500).json({ message: "Error Servidor" });
   }
 };
 
 export const Nota = async (req, res) => {
   try {
     const id = req.params.id;
-    console.log(id, " id ", req.params.id);
 
     const noticia = await Noticia.findOne({
       where: { id },
@@ -209,12 +217,11 @@ export const Nota = async (req, res) => {
     });
 
     if (noticia) {
-      return res.status(200).json({ message: noticia });
+      return res.status(200).json({ noticia });
     } else {
       return res.status(404).json({ message: "Noticia no encontrada" });
     }
   } catch (error) {
-    console.log("error ", error);
     return res.status(500).json({ message: "Error del servidor" });
   }
 };
@@ -226,47 +233,83 @@ export const Notas = async (req, res) => {
         { model: Items },
         { model: Categoria },
         { model: SubCategoria },
-        { model: Comentario },
       ],
+      order: [["id", "ASC"]],
     });
     return res.status(200).json({ noticias });
   } catch (error) {
-    console.log("error", error);
     return res.status(500).json({ message: "Error del servidor" });
   }
 };
 
-
 export const VerNotaEscritor = async (req, res) => {
   try {
-    const decodedToken = jwt.verify(req.token, "escritor");
-    const noticia = await Noticia.findAll({
-      where: {
-        autor: decodedToken.user.nombre + " " + decodedToken.user.apellido,
-      },
-      include: [
-        { model: Items },
-        { model: Categoria },
-        { model: SubCategoria },
-      ],
-    });
-    return res.status(200).json({ message: noticia });
+    try {
+      const decodedToken = jwt.verify(req.token, "escritor");
+      const noticia = await Noticia.findAll({
+        where: {
+          autor: decodedToken.user.nombre + " " + decodedToken.user.apellido,
+        },
+        include: [
+          { model: Items },
+          { model: Categoria },
+          { model: SubCategoria },
+        ],
+      });
+      return res.status(200).json({ noticia });
+    } catch (error) {
+      return res.status(401).json({ message: "Token inválido" });
+    }
   } catch (error) {
-    console.log("error ", error);
-    return res.status(500).json({ message: "Error servidor em escritor" });
+    return res.status(500).json({ message: "Error del servidor" });
   }
 };
 
-export const NotaTitulo = async (req, res) => {
+export const VerNotaAdministrador = async (req, res) => {
   try {
-    const { titulo } = req.body;
+    try {
+      const decodedToken = jwt.verify(req.token, "administrador");
+      const noticia = await Noticia.findAll({
+        where: {
+          autor: decodedToken.user.nombre + " " + decodedToken.user.apellido,
+        },
+        include: [
+          { model: Items },
+          { model: Categoria },
+          { model: SubCategoria },
+        ],
+      });
+      return res.status(200).json({ noticia });
+    } catch (error) {
+      return res.status(401).json({ message: "Token inválido" });
+    }
+  } catch (error) {
+    return res.status(500).json({ message: "Error del servidor" });
+  }
+};
+
+export const FindNotaTitulo = async (req, res) => {
+  const { q } = req.query;
+  try {
     const noticia = await Noticia.findAll({
-      where: { titulo },
+      where: { titulo: { [Op.like]: `%${q}%` } },
       include: [
         { model: Items },
         { model: Categoria },
         { model: SubCategoria },
       ],
     });
-  } catch (error) {}
+    if (noticia.length === 0) {
+      return res.status(404).json({ message: "No se encontraron categorías" });
+    }
+    try {
+      const decodedToken = jwt.verify(req.token, "administrador");
+      // Aquí podrías hacer más comprobaciones con el token si es necesario
+      return res.status(200).json({ noticia });
+    } catch (error) {
+      return res.status(401).json({ message: "Token inválido" });
+    }
+  } catch (error) {
+    res.status(500).json({ message: "Error en el servidor" });
+  }
 };
