@@ -302,13 +302,7 @@ export const FindNotaTitulo = async (req, res) => {
     if (noticia.length === 0) {
       return res.status(404).json({ message: "No se encontraron categorías" });
     }
-    try {
-      const decodedToken = jwt.verify(req.token, "administrador");
-      // Aquí podrías hacer más comprobaciones con el token si es necesario
-      return res.status(200).json({ noticia });
-    } catch (error) {
-      return res.status(401).json({ message: "Token inválido" });
-    }
+    return res.status(200).json({ noticia });
   } catch (error) {
     res.status(500).json({ message: "Error en el servidor" });
   }
