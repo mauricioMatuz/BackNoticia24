@@ -31,6 +31,10 @@ export const Usuarios = sequelize.define(
       allowNull: false,
       // defaultValue: "root",
     },
+     createdAt: {
+      type: DataTypes.DATEONLY, // Utiliza DataTypes.DATEONLY en lugar de DataTypes.DATE
+      defaultValue: DataTypes.NOW, // Establece la fecha actual por defecto
+    },
   },
   {
     // don't add the timestamp attributes (updatedAt, createdAt)

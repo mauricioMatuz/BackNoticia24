@@ -200,8 +200,7 @@ export const Borrar = async (req, res) => {
 export const ListaEscritor = async (req, res) => {
   try {
     try {
-      const { rol } = req.body;
-      jwt.verify(req.token, rol);
+      jwt.verify(req.token, 'administrador');
     } catch (error) {
       return res.status(401).json({ message: 'Toekn inválido' });
     }
@@ -218,7 +217,11 @@ export const ListaEscritor = async (req, res) => {
         rolID: escritorRol.id,
       },
     });
-    return res.status(200).json({ message: escritores });
+    if (escritores) {
+      return res.status(200).json({ message: escritores });
+    } else {
+      return res.status(404).json({ message: 'No hay escritores' });
+    }
   } catch (error) {
     return res.status(500).json({ message: 'Error del servidor' });
   }
