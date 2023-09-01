@@ -8,7 +8,8 @@ import {
   RegistrarLector,
   Roles,
   crearRoot,
-} from "../controllers/usuario.controller.js";
+  ListaEscritor,
+} from '../controllers/usuario.controller.js';
 import { verifyToken } from "../middleware/verifyToken.js";
 
 // function verifyToken(req, res, next) {
@@ -32,5 +33,6 @@ router.put("/api/update", verifyToken, ActualizarDatos);
 router.post("/api/login", Login);
 router.post("/api/rol", verifyToken, Roles);
 router.get("/api/get", Borrar);
+router.get("/api/escritor",verifyToken,ListaEscritor)
 
 export default router;
