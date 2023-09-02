@@ -101,52 +101,56 @@ paths:
           description: Bad request. Correo ya existe
         503:
           description: Servicio no disponible
-  /api/update:
+  /api/update/{id}:
     put:
       tags:
         - usuario
-      summary: Actualizar Datos de usuario
+      summary: Actualizar datos de un usuario
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Identificador del usuario a actualizar
+          schema:
+            type: integer
       requestBody:
-        description: Actualizar valores de los usuarios, sin importar su rol
         required: true
         content:
           application/json:
             schema:
               type: object
               properties:
-                id:
-                  type: integer
-                  description: el ID del usuario para buscar y editar
-                  example: 9
+              
                 nombre:
                   type: string
-                  description: Nombre del escritor
-                  example: Mauricio
+                  description: Nombre del usuario
                 apellido:
                   type: string
-                  description: Apellido del escritor
-                  example: Gonzalez Marquez
+                  description: Apellido del usuario
                 correo:
                   type: string
-                  description: Correo para iniciar sesion
-                  example: mauricio@gmail.com
+                  description: Correo electrónico del usuario
                 password:
                   type: string
-                  description: Contraseña que tendra el usuario
-                  example: 123
+                  description: Contraseña del usuario
                 rolID:
                   type: integer
-                  description: Este rolID es para saber si es necesario un token para actualizar o no
-                  example: 3 | 2
+                  description: Identificador del rol del usuario
+              required:
+                - correo
+                - password
+                - rolID
       responses:
         200:
-          description: Usuario actualizado
+          description: Actualizado exitosamente
+        400:
+          description: Rol inválido
+        403:
+          description: Token inválido
         404:
           description: Usuario no encontrado
-        400:
-          description: Rol invalido
         503:
-          description: Servidor no disponible
+          description: Servicio no disponible
   /api/login:
     post:
       tags:

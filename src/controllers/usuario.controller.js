@@ -64,7 +64,7 @@ export const RegistrarAdministrador = async (req, res) => {
 
 export const ActualizarDatos = async (req, res) => {
   try {
-    const { id } = req.body;
+    const { id } = req.params; // Obtener el valor de id de los parámetros
     const usuario = await Usuarios.findOne({
       where: { id },
       attributes: ['correo', 'password', 'rolID'],

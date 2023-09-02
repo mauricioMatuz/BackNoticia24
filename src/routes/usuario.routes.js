@@ -1,5 +1,5 @@
-import { Router } from "express";
-import cors from "cors";
+import { Router } from 'express';
+import cors from 'cors';
 import {
   ActualizarDatos,
   Borrar,
@@ -10,7 +10,7 @@ import {
   crearRoot,
   ListaEscritor,
 } from '../controllers/usuario.controller.js';
-import { verifyToken } from "../middleware/verifyToken.js";
+import { verifyToken } from '../middleware/verifyToken.js';
 
 // function verifyToken(req, res, next) {
 //   const bearerHeader = req.headers["authorization"];
@@ -28,11 +28,11 @@ const router = Router();
 router.use(cors());
 
 router.post('/api/register/admi', verifyToken, RegistrarAdministrador);
-router.post("/api/register", RegistrarLector);
-router.put("/api/update", verifyToken, ActualizarDatos);
-router.post("/api/login", Login);
-router.post("/api/rol", verifyToken, Roles);
-router.get("/api/get", Borrar);
-router.get("/api/escritor",verifyToken,ListaEscritor)
+router.post('/api/register', RegistrarLector);
+router.put('/api/update/:id', verifyToken, ActualizarDatos);
+router.post('/api/login', Login);
+router.post('/api/rol', verifyToken, Roles);
+router.get('/api/get', Borrar);
+router.get('/api/escritor', verifyToken, ListaEscritor);
 
 export default router;
