@@ -27,7 +27,7 @@ const router = Router();
 
 router.use(cors());
 
-router.post("/api/register/admi", verifyToken, RegistrarAdministrador);
+router.post('/api/register/admi', verifyToken, RegistrarAdministrador);
 router.post("/api/register", RegistrarLector);
 router.put("/api/update", verifyToken, ActualizarDatos);
 router.post("/api/login", Login);

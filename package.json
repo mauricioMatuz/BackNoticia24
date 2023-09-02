@@ -10,7 +10,9 @@
     "path": "^0.12.7",
     "pg": "^8.11.0",
     "pg-hstore": "^2.3.4",
-    "sequelize": "^6.31.1"
+    "sequelize": "^6.31.1",
+    "swagger-ui-express": "^5.0.0",
+    "yamljs": "^0.3.0"
   },
   "name": "prueba1",
   "version": "1.0.0",

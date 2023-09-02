@@ -1,0 +1,655 @@
+openapi: '3.0.2'
+info:
+  title: Documentación de API rest de noticias
+  version: '1.0'
+servers:
+  - url: http://localhost:8080
+tags:
+  - name: usuario
+    description: Documentacion de las URL's de usuario
+    externalDocs:
+      url: http://localhost:8080
+  - name: categoria
+    description: Documentacion de las URL's de categoria
+    externalDocs:
+      url: http://localhost:8080
+  - name: subcategoria
+    description: Documentacion de las URL's de subcategoria
+    externalDocs:
+      url: http://localhost:8080
+
+paths:
+  /api/register/admi:
+    post:
+      tags:
+        - usuario
+      summary: Crear nuevo escritor
+      requestBody:
+        description: Nombre de las variables requeridas para crear escritor
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                nombre:
+                  type: string
+                  description: Nombre del escritor
+                  example: Mauricio
+                apellido:
+                  type: string
+                  description: Apellido del escritor
+                  example: Gonzalez Marquez
+                correo:
+                  type: string
+                  description: Correo para iniciar sesion
+                  example: mauricio@gmail.com
+                password:
+                  type: string
+                  description: Contraseña que tendra el usuario
+                  example: 123
+                rolID:
+                  type: integer
+                  description: lleve foranea para saber si es lector o escritor
+                  example: 1
+      responses:
+        200:
+          description: Nuevo escritor creado
+        403:
+          description: Bad request. Token invalido
+        409:
+          description: Correo ya existente
+        503:
+          description: Servicio no disponible
+  /api/register:
+    post:
+      tags:
+        - usuario
+      summary: Crear nuevo escritor
+      requestBody:
+        description: Nombre de las variables requeridas para crear escritor
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                nombre:
+                  type: string
+                  description: Nombre del escritor
+                  example: Mauricio
+                apellido:
+                  type: string
+                  description: Apellido del escritor
+                  example: Gonzalez Marquez
+                correo:
+                  type: string
+                  description: Correo para iniciar sesion
+                  example: mauricio@gmail.com
+                password:
+                  type: string
+                  description: Contraseña que tendra el usuario
+                  example: 123
+                rolID:
+                  type: integer
+                  description: lleve foranea para saber si es lector o escritor
+                  example: 3
+      responses:
+        201:
+          description: Nuevo escritor creado
+        409:
+          description: Bad request. Correo ya existe
+        503:
+          description: Servicio no disponible
+  /api/update:
+    put:
+      tags:
+        - usuario
+      summary: Actualizar Datos de usuario
+      requestBody:
+        description: Actualizar valores de los usuarios, sin importar su rol
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id:
+                  type: integer
+                  description: el ID del usuario para buscar y editar
+                  example: 9
+                nombre:
+                  type: string
+                  description: Nombre del escritor
+                  example: Mauricio
+                apellido:
+                  type: string
+                  description: Apellido del escritor
+                  example: Gonzalez Marquez
+                correo:
+                  type: string
+                  description: Correo para iniciar sesion
+                  example: mauricio@gmail.com
+                password:
+                  type: string
+                  description: Contraseña que tendra el usuario
+                  example: 123
+                rolID:
+                  type: integer
+                  description: Este rolID es para saber si es necesario un token para actualizar o no
+                  example: 3 | 2
+      responses:
+        200:
+          description: Usuario actualizado
+        404:
+          description: Usuario no encontrado
+        400:
+          description: Rol invalido
+        503:
+          description: Servidor no disponible
+  /api/login:
+    post:
+      tags:
+        - usuario
+      summary: Crear nuevo escritor
+      requestBody:
+        description: Nombre de las variables requeridas para crear escritor
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                correo:
+                  type: string
+                  description: Correo para iniciar sesion
+                  example: mauricio@gmail.com
+                password:
+                  type: string
+                  description: Contraseña que tendra el usuario
+                  example: 123
+      responses:
+        201:
+          description: Nuevo escritor creado
+        409:
+          description: Bad request. Correo ya existe
+        503:
+          description: Servicio no disponible
+  /api/escritor:
+    get:
+      tags:
+        - usuario
+      summary: Listado de escritores registrados
+      responses:
+        200:
+          description: Lista de usuario
+  /api/categorias:
+    get:
+      tags:
+        - categoria
+      summary: Listado de categorias
+      responses:
+        200:
+          description: Lista de categorias
+  /api/buscar:
+    get:
+      tags:
+        - categoria
+      parameters:
+        - name: query
+          in: query
+          description: Término de búsqueda
+          required: true
+          schema:
+            type: string
+        - name: Authorization
+          in: header
+          description: Token de autorización JWT
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Categorías encontradas con éxito
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  categoria:
+                    type: array
+                    items:
+                      type: object # Define aquí las propiedades de una categoría
+        401:
+          description: Token inválido
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        404:
+          description: No se encontraron categorías
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        500:
+          description: Error en el servidor
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+  /api/crear/categoria:
+    post:
+      summary: Crear nueva categoría
+      description: Crea una nueva categoría con el nombre proporcionado.
+      tags:
+        - categoria
+      requestBody:
+        description: Datos de la nueva categoría
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                Nuevacategoria:
+                  type: string
+                  example: nacional
+      responses:
+        200:
+          description: Categoría creada con éxito
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        401:
+          description: Token inválido
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        500:
+          description: Error en el servidor
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+  /actualizar/categoria:
+    put:
+      summary: Actualizar categoría
+      description: Actualiza una categoría existente según el ID proporcionado.
+      tags:
+        - categoria
+      parameters:
+        - name: id
+          in: query
+          description: ID de la categoría a actualizar
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        description: Datos de la categoría actualizada
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id:
+                  type: number
+                  example: 3
+                Nuevacategoria:
+                  type: string
+                  example: nacional
+                # Define aquí las propiedades que se pueden actualizar
+      responses:
+        200:
+          description: Categoría actualizada con éxito
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        401:
+          description: Token inválido
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        404:
+          description: Categoría no encontrada
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        500:
+          description: Error en el servidor
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+  /api/borrar/categoria/{id}:
+    delete:
+      summary: Borrar categoría
+      description: Borra una categoría existente según el ID proporcionado.
+      tags:
+        - categoria
+      parameters:
+        - name: id
+          in: path
+          description: ID de la categoría a borrar
+          required: true
+          schema:
+            type: integer
+            example: 11
+      responses:
+        200:
+          description: Categoría borrada con éxito
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        401:
+          description: Token inválido
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        404:
+          description: Categoría no encontrada
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        500:
+          description: Error en el servidor
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+  /api/subcategoria:
+    get:
+      summary: Obtener lista de subcategoria
+      description: Obtiene la lista de subcategoria disponibles en orden ascendente por ID.
+      tags:
+        - subcategoria
+      responses:
+        200:
+          description: Lista de subcategoria obtenida con éxito
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  subcategoria:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        subcategoria:
+                          type: string
+                          example: medico
+        403:
+          description: Token inválido
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        500:
+          description: Error en el servidor
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+  /api/buscar/subcategoria:
+    get:
+      summary: Buscar subcategoria
+      description: Busca subcategoria que coincidan con un término de búsqueda.
+      tags:
+        - subcategoria
+      parameters:
+        - name: q
+          in: query
+          description: Término de búsqueda
+          required: true
+          schema:
+            type: string
+        - name: Authorization
+          in: header
+          description: Token de autorización JWT
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: subcategoria encontradas con éxito
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  subcategoria:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        subcategoría:
+                          type: string
+                          example: medico
+                        # Define aquí las propiedades de una subcategoría
+        401:
+          description: Token inválido
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        404:
+          description: No se encontraron subcategoria
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        500:
+          description: Error en el servidor
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+  /api/actualizar/subcategoria:
+    put:
+      summary: Actualizar subcategoría
+      description: Actualiza una subcategoría existente según el ID proporcionado.
+      tags:
+        - subcategoria
+      requestBody:
+        description: Datos de la subcategoría actualizada
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id:
+                  type: integer
+                  description: ID de la subcategoría a actualizar
+                # Define aquí las propiedades que se pueden actualizar
+      responses:
+        200:
+          description: Subcategoría actualizada con éxito
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        401:
+          description: Token inválido
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        404:
+          description: Subcategoría no encontrada
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        500:
+          description: Error en el servidor
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+  /api/borrar/subcategoria/{id}:
+    delete:
+      summary: Borrar subcategoría
+      description: Borra una subcategoría existente según el ID proporcionado.
+      tags:
+        - subcategoria
+      parameters:
+        - name: id
+          in: path
+          description: ID de la subcategoría a borrar
+          required: true
+          schema:
+            type: integer
+      responses:
+        204:
+          description: Subcategoría borrada con éxito
+        401:
+          description: Token inválido
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        404:
+          description: Subcategoría no encontrada
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        500:
+          description: Error en el servidor
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+  /crear/subcategoria:
+    post:
+      summary: Crear nueva subcategoría
+      description: Crea una nueva subcategoría con el nombre proporcionado.
+      tags:
+        - subcategoria
+      requestBody:
+        description: Datos de la nueva subcategoría
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                subcategoria:
+                  type: string
+      responses:
+        201:
+          description: Subcategoría creada con éxito
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        401:
+          description: Token inválido
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        500:
+          description: Error en el servidor
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
