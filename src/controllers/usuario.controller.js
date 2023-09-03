@@ -1,7 +1,7 @@
-import { Usuarios } from '../models/usuario.models.js';
-import { Rol } from '../models/rol.models.js';
-import jwt from 'jsonwebtoken';
-import { sequelize } from '../database/database.js';
+import { Usuarios } from "../models/usuario.models.js";
+import { Rol } from "../models/rol.models.js";
+import jwt from "jsonwebtoken";
+import { sequelize } from "../database/database.js";
 
 export const RegistrarLector = async (req, res) => {
   try {
@@ -15,16 +15,16 @@ export const RegistrarLector = async (req, res) => {
           password,
           rolID: 3,
         },
-        { transaction: t },
+        { transaction: t }
       );
     });
 
-    return res.status(201).json({ message: 'Registro exitoso' });
+    return res.status(201).json({ message: "Registro exitoso" });
   } catch (error) {
-    if (error.name === 'SequelizeUniqueConstraintError') {
-      return res.status(409).json({ message: 'Correo ya existente' });
+    if (error.name === "SequelizeUniqueConstraintError") {
+      return res.status(409).json({ message: "Correo ya existente" });
     }
-    return res.status(503).json({ message: 'Servicio no disponible', error });
+    return res.status(503).json({ message: "Servicio no disponible", error });
   }
 };
 
@@ -33,9 +33,9 @@ export const RegistrarAdministrador = async (req, res) => {
     const { nombre, apellido, correo, password, rolID } = req.body;
 
     await sequelize.transaction(async (t) => {
-      const banderaToken = jwt.verify(req.token, 'administrador');
+      const banderaToken = jwt.verify(req.token, "administrador");
       if (!banderaToken) {
-        return res.status(403).json({ message: 'Token inválido' });
+        return res.status(403).json({ message: "Token inválido" });
       }
       await Usuarios.create(
         {
@@ -45,20 +45,20 @@ export const RegistrarAdministrador = async (req, res) => {
           password,
           rolID,
         },
-        { transaction: t },
+        { transaction: t }
       );
     });
 
     return res
       .status(201)
-      .json({ message: 'Nuevo administrador/escritor creado' });
+      .json({ message: "Nuevo administrador/escritor creado" });
   } catch (error) {
-    if (error.name === 'JsonWebTokenError') {
-      return res.status(403).json({ message: 'Token inválido' });
-    } else if (error.name === 'SequelizeUniqueConstraintError') {
-      return res.status(409).json({ message: 'Correo ya existente' });
+    if (error.name === "JsonWebTokenError") {
+      return res.status(403).json({ message: "Token inválido" });
+    } else if (error.name === "SequelizeUniqueConstraintError") {
+      return res.status(409).json({ message: "Correo ya existente" });
     }
-    return res.status(503).json({ message: 'Servicio no disponible', error });
+    return res.status(503).json({ message: "Servicio no disponible", error });
   }
 };
 
@@ -68,64 +68,66 @@ export const ActualizarDatos = async (req, res) => {
     const usuario = await Usuarios.findByPk(id); // Busca al usuario por ID
 
     if (!usuario) {
-      return res.status(404).json({ message: 'Usuario no encontrado' });
+      return res.status(404).json({ message: "Usuario no encontrado" });
     }
 
     // Verifica el token y realiza la actualización si es válido
-    jwt.verify(req.token, 'administrador', async (error) => {
+    jwt.verify(req.token, "administrador", async (error) => {
       if (error) {
-        return res.status(403).json({ message: 'Token inválido' });
+        return res.status(403).json({ message: "Token inválido" });
       }
 
       // Actualiza el usuario con los datos de req.body
       await usuario.update(req.body);
 
-      return res.status(200).json({ message: 'Actualizado exitosamente' });
+      return res.status(200).json({ message: "Actualizado exitosamente" });
     });
   } catch (error) {
-    return res.status(503).json({ message: 'Servicio no disponible', error });
+    return res.status(503).json({ message: "Servicio no disponible", error });
   }
 };
 
 export const BorrarEscritor = async (req, res) => {
+  console.log("te entro uwu");
   try {
     try {
-      jwt.verify(req.token, 'administrador');
+      jwt.verify(req.token, "administrador");
     } catch (error) {
-      return res.status(403).json({ message: 'Error token' });
+      return res.status(403).json({ message: "Error token" });
     }
     const { id } = req.params; // Obtener el valor de id de los parámetros
+    console.log(id);
     const usuario = await Usuarios.findOne({
       where: { id },
     });
     if (!usuario) {
-      return res.status(404).json({ message: 'Usuario no encontrado' });
+      return res.status(404).json({ message: "Usuario no encontrado" });
     }
     await sequelize.transaction(async (t) => {
       await usuario.destroy({ transaction: t });
     });
-    return res.status(200).json({ message: 'Escritor borrado' });
+    return res.status(200).json({ message: "Escritor borrado" });
   } catch (error) {
-    return res.status(503).json({ message: 'Error servidor' });
+    return res.status(503).json({ message: "Error servidor" });
   }
 };
 export const BuscarEscritor = async (req, res) => {
   try {
     try {
-      jwt.verify(req.token, 'administrador');
+      jwt.verify(req.token, "administrador");
     } catch (error) {
-      return res.status(403).json({ message: 'Error token' });
+      return res.status(403).json({ message: "Error token" });
     }
     const { id } = req.params; // Obtener el valor de id de los parámetros
     const usuario = await Usuarios.findOne({
       where: { id },
     });
     if (!usuario) {
-      return res.status(404).json({ message: 'Usuario no encontrado' });
+      return res.status(404).json({ message: "Usuario no encontrado" });
     }
     return res.status(200).json(usuario);
   } catch (error) {
-    return res.status(500).json({ message: 'Error' });
+    return res.status(500).json({ message: "Error" });
   }
 };
 
@@ -137,28 +139,28 @@ export const Login = async (req, res) => {
     });
 
     if (!usuario) {
-      return res.status(401).json({ message: 'No hay usuario' });
+      return res.status(401).json({ message: "No hay usuario" });
     }
 
     let secretKey;
     switch (usuario.rolID) {
       case 1:
-        secretKey = 'administrador';
+        secretKey = "administrador";
         break;
       case 2:
-        secretKey = 'escritor';
+        secretKey = "escritor";
         break;
       case 3:
-        secretKey = 'lector';
+        secretKey = "lector";
         break;
       default:
-        return res.status(400).json({ message: 'Rol inválido' });
+        return res.status(400).json({ message: "Rol inválido" });
     }
 
     const token = jwt.sign({ user: usuario }, secretKey);
     return res.status(200).json({ token, rol: secretKey });
   } catch (error) {
-    return res.status(503).json({ message: 'Servicio no disponible' });
+    return res.status(503).json({ message: "Servicio no disponible" });
   }
 };
 
@@ -174,13 +176,13 @@ export const crearRoot = async (req, res) => {
           password,
           rolID: 1,
         },
-        { transaction: t },
+        { transaction: t }
       );
     });
 
-    return res.status(201).json({ message: 'Usuario root creado' });
+    return res.status(201).json({ message: "Usuario root creado" });
   } catch (error) {
-    return res.status(500).json({ message: 'Error del servidor' });
+    return res.status(500).json({ message: "Error del servidor" });
   }
 };
 
@@ -188,9 +190,9 @@ export const Roles = async (req, res, next) => {
   let t;
   try {
     t = await sequelize.transaction();
-    const bandera = jwt.verify(req.token, 'administrador');
+    const bandera = jwt.verify(req.token, "administrador");
     if (!bandera) {
-      return res.status(403).json({ message: 'Token inválido' });
+      return res.status(403).json({ message: "Token inválido" });
     }
 
     const { rolcito } = req.body;
@@ -198,16 +200,16 @@ export const Roles = async (req, res, next) => {
       {
         rol: rolcito,
       },
-      { transaction: t },
+      { transaction: t }
     );
 
     await t.commit();
-    return res.status(201).json({ message: 'Rol creado exitosamente' });
+    return res.status(201).json({ message: "Rol creado exitosamente" });
   } catch (error) {
     if (t) {
       await t.rollback();
     }
-    return res.status(500).json({ message: 'Error del servidor' });
+    return res.status(500).json({ message: "Error del servidor" });
   }
 };
 
@@ -217,24 +219,24 @@ export const Borrar = async (req, res) => {
     const roles = await Rol.findAll();
     return res.json({ roles, usuarios });
   } catch (error) {
-    return res.status(500).json({ message: 'Error del servidor' });
+    return res.status(500).json({ message: "Error del servidor" });
   }
 };
 
 export const ListaEscritor = async (req, res) => {
   try {
     try {
-      jwt.verify(req.token, 'administrador');
+      jwt.verify(req.token, "administrador");
     } catch (error) {
-      return res.status(401).json({ message: 'Toekn inválido' });
+      return res.status(401).json({ message: "Toekn inválido" });
     }
     const escritorRol = await Rol.findOne({
       where: {
-        rol: 'escritor', // Nombre del rol de escritor en tu base de datos
+        rol: "escritor", // Nombre del rol de escritor en tu base de datos
       },
     });
     if (!escritorRol) {
-      return res.status(404).json({ message: 'No hay rol escritor' });
+      return res.status(404).json({ message: "No hay rol escritor" });
     }
     const escritores = await Usuarios.findAll({
       where: {
@@ -244,9 +246,9 @@ export const ListaEscritor = async (req, res) => {
     if (escritores) {
       return res.status(200).json({ message: escritores });
     } else {
-      return res.status(404).json({ message: 'No hay escritores' });
+      return res.status(404).json({ message: "No hay escritores" });
     }
   } catch (error) {
-    return res.status(500).json({ message: 'Error del servidor' });
+    return res.status(500).json({ message: "Error del servidor" });
   }
 };
