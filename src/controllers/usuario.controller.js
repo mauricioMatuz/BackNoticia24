@@ -105,6 +105,29 @@ export const ActualizarDatos = async (req, res) => {
   }
 };
 
+export const BorrarEscritor = async (req, res) => {
+  try {
+    try {
+      jwt.verify(req.token, 'administrador');
+    } catch (error) {
+      return res.status(403).json({ message: 'Error token' });
+    }
+    const { id } = req.params; // Obtener el valor de id de los parámetros
+    const usuario = await Usuarios.findOne({
+      where: { id },
+    });
+    if (!usuario) {
+      return res.status(404).json({ message: 'Usuario no encontrado' });
+    }
+    await sequelize.transaction(async (t) => {
+      await usuario.destroy({ transaction: t });
+    });
+    return res.status(200).json({ message: 'Escritor borrado' });
+  } catch (error) {
+    return res.status(503).json({ message: 'Error servidor' });
+  }
+};
+
 export const Login = async (req, res) => {
   try {
     const { correo, password } = req.body;

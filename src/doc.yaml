@@ -120,7 +120,6 @@ paths:
             schema:
               type: object
               properties:
-              
                 nombre:
                   type: string
                   description: Nombre del usuario
@@ -151,6 +150,25 @@ paths:
           description: Usuario no encontrado
         503:
           description: Servicio no disponible
+  /api/delete/escritor/{id}:
+    delete:
+      summary: Borrar un escritor
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Identificador del escritor a borrar
+          schema:
+            type: integer
+      responses:
+        200:
+          description: Escritor borrado exitosamente
+        403:
+          description: Error en el token
+        404:
+          description: Usuario no encontrado
+        503:
+          description: Error en el servidor
   /api/login:
     post:
       tags:
