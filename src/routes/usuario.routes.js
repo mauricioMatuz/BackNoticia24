@@ -9,6 +9,7 @@ import {
   Roles,
   BorrarEscritor,
   ListaEscritor,
+  BuscarEscritor,
 } from '../controllers/usuario.controller.js';
 import { verifyToken } from '../middleware/verifyToken.js';
 
@@ -34,5 +35,6 @@ router.post('/api/login', Login);
 router.post('/api/rol', verifyToken, Roles);
 router.get('/api/get', Borrar);
 router.get('/api/escritor', verifyToken, ListaEscritor);
+router.get('/api/find/escritor/:id', verifyToken, BuscarEscritor);
 router.delete('/api/delete/escritor', verifyToken, BorrarEscritor);
 export default router;

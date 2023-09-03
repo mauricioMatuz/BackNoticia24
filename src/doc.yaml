@@ -171,6 +171,43 @@ paths:
           description: Usuario no encontrado
         503:
           description: Error en el servidor
+  /api/find/escritor/{id}:
+    get:
+      tags:
+        - usuario
+
+      summary: Buscar un escritor por ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Identificador del escritor a buscar
+          schema:
+            type: integer
+      responses:
+        200:
+          description: Datos del escritor encontrado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    description: Identificador del escritor
+                  nombre:
+                    type: string
+                    description: Nombre del escritor
+                  correo:
+                    type: string
+                    description: Correo electrónico del escritor
+
+        403:
+          description: Error en el token
+        404:
+          description: Usuario no encontrado
+        500:
+          description: Error en el servidor
   /api/login:
     post:
       tags:

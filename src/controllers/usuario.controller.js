@@ -127,6 +127,25 @@ export const BorrarEscritor = async (req, res) => {
     return res.status(503).json({ message: 'Error servidor' });
   }
 };
+export const BuscarEscritor = async (req, res) => {
+  try {
+    try {
+      jwt.verify(req.token, 'administrador');
+    } catch (error) {
+      return res.status(403).json({ message: 'Error token' });
+    }
+    const { id } = req.params; // Obtener el valor de id de los parámetros
+    const usuario = await Usuarios.findOne({
+      where: { id },
+    });
+    if (!usuario) {
+      return res.status(404).json({ message: 'Usuario no encontrado' });
+    }
+    return res.status(200).json(usuario);
+  } catch (error) {
+    return res.status(500).json({ message: 'Error' });
+  }
+};
 
 export const Login = async (req, res) => {
   try {
