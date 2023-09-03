@@ -80,7 +80,7 @@ export const ActualizarDatos = async (req, res) => {
         secretKey = 'administrador';
         break;
       case 2:
-        secretKey = 'escritor';
+        secretKey = "administrador";
         break;
       case 3:
         secretKey = 'lector';
