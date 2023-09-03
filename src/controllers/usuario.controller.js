@@ -64,39 +64,21 @@ export const RegistrarAdministrador = async (req, res) => {
 
 export const ActualizarDatos = async (req, res) => {
   try {
-    const { id } = req.params; // Obtener el valor de id de los parámetros
-    const usuario = await Usuarios.findOne({
-      where: { id },
-      attributes: ['correo', 'password', 'rolID'],
-    });
+    const { id } = req.params;
+    const usuario = await Usuarios.findByPk(id); // Busca al usuario por ID
 
     if (!usuario) {
       return res.status(404).json({ message: 'Usuario no encontrado' });
     }
 
-    let secretKey;
-    switch (usuario.rolID) {
-      case 1:
-        secretKey = 'administrador';
-        break;
-      case 2:
-        secretKey = 'escritor';
-        break;
-      case 3:
-        secretKey = 'lector';
-        break;
-      default:
-        return res.status(400).json({ message: 'Rol inválido' });
-    }
-
-    jwt.verify(req.token, secretKey, async (error) => {
+    // Verifica el token y realiza la actualización si es válido
+    jwt.verify(req.token, 'administrador', async (error) => {
       if (error) {
         return res.status(403).json({ message: 'Token inválido' });
       }
 
-      await sequelize.transaction(async (t) => {
-        await usuario.set(req.body).save({ transaction: t });
-      });
+      // Actualiza el usuario con los datos de req.body
+      await usuario.update(req.body);
 
       return res.status(200).json({ message: 'Actualizado exitosamente' });
     });

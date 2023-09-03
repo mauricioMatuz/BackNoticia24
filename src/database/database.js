@@ -1,7 +1,7 @@
-import Sequelize from "sequelize";
+import Sequelize from 'sequelize';
 
-export const sequelize = new Sequelize("prueba1", "postgres", "191214", {
-  host: "localhost",
-  dialect: "postgres",
+export const sequelize = new Sequelize('prueba1', 'postgres', '123', {
+  host: 'localhost',
+  dialect: 'postgres',
   logging: false,
 });
