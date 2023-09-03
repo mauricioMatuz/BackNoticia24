@@ -152,6 +152,8 @@ paths:
           description: Servicio no disponible
   /api/delete/escritor/{id}:
     delete:
+      tags:
+        - usuario
       summary: Borrar un escritor
       parameters:
         - name: id
