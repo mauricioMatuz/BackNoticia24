@@ -6,7 +6,7 @@ import { SubCategoria } from "./subcategoria.models.js";
 import { Items } from "./item.models.js";
 
 export const Noticia = sequelize.define(
-  "noticia",
+  'noticia',
   {
     id: {
       type: DataTypes.UUID,
@@ -26,16 +26,15 @@ export const Noticia = sequelize.define(
       type: DataTypes.STRING,
       allowNull: false,
     },
-    fecha: {
-      type: DataTypes.STRING,
-      allowNull: false,
+    createdAt: {
+      type: DataTypes.DATEONLY, // Utiliza DataTypes.DATEONLY en lugar de DataTypes.DATE
+      defaultValue: DataTypes.NOW, // Establece la fecha actual por defecto
     },
     //! videos (galeria)
 
     //? filtros (fecha,mas like, mas dislike, mas comentarios)
     //? busqueda por titulo
     // notificaciones de notas (solo admi)
-
   },
   {
     // don't add the timestamp attributes (updatedAt, createdAt)
@@ -46,7 +45,7 @@ export const Noticia = sequelize.define(
 
     // If don't want updatedAt
     updatedAt: false,
-  }
+  },
 );
 
 Items.belongsTo(Noticia, {

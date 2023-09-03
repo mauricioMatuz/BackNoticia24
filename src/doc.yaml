@@ -17,6 +17,9 @@ tags:
     description: Documentacion de las URL's de subcategoria
     externalDocs:
       url: http://localhost:8080
+  - name: noticia
+    externalDocs:
+      url: http://localhost:8080
 
 paths:
   /api/register/admi:
@@ -714,3 +717,360 @@ paths:
                 properties:
                   message:
                     type: string
+  /api/registrar/nota:
+    post:
+      summary: Crea una nueva nota periodística.
+      description: >
+        Esta ruta te permite crear una nueva nota periodística y asociar imágenes a ella.
+      tags:
+        - noticia
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                titulo:
+                  type: string
+                  description: Título de la nota.
+                descripcion:
+                  type: string
+                  description: Cuerpo de la nota.
+                categoriaID:
+                  type: integer
+                  description: ID de la categoría de la nota.
+                subcategoriaID:
+                  type: integer
+                  description: ID de la subcategoría de la nota.
+                rol:
+                  type: string
+                  description: Rol del usuario autenticado.
+                images:
+                  type: array
+                  items:
+                    type: string
+                  description: Archivos de imagen a asociar con la nota.
+      responses:
+        '201':
+          description: Nota creada exitosamente.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Mensaje de éxito.
+        '500':
+          description: Error del servidor.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Mensaje de error.
+  /api/noticias:
+    get:
+      summary: Obtiene una lista de notas periodísticas.
+      description: >
+        Esta ruta te permite obtener una lista de todas las notas periodísticas existentes.
+      tags:
+        - noticia
+      responses:
+        '200':
+          description: Lista de notas periodísticas.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  noticias:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                          description: ID de la nota.
+                        titulo:
+                          type: string
+                          description: Título de la nota.
+                        descripcion:
+                          type: string
+                          description: Cuerpo de la nota.
+                        categoria:
+                          type: object
+                          properties:
+                            id:
+                              type: integer
+                              description: ID de la categoría de la nota.
+                            nombre:
+                              type: string
+                              description: Nombre de la categoría de la nota.
+                        subcategoria:
+                          type: object
+                          properties:
+                            id:
+                              type: integer
+                              description: ID de la subcategoría de la nota.
+                            nombre:
+                              type: string
+                              description: Nombre de la subcategoría de la nota.
+                        items:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              id:
+                                type: integer
+                                description: ID del ítem asociado a la nota.
+                              nombre:
+                                type: string
+                                description: Nombre del ítem asociado a la nota.
+        '500':
+          description: Error del servidor.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Mensaje de error.
+  /api/actualizar/nota/{id}:
+    put:
+      tags:
+        - noticia
+      summary: Actualizar una nota por ID
+      description: Actualiza una nota existente identificada por su ID.
+      parameters:
+        - in: path
+          name: id
+          description: ID de la nota que se va a actualizar
+          required: true
+          schema:
+            type: integer
+        - in: header
+          name: Authorization
+          description: Token de autorización JWT
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                rol:
+                  type: string
+                  description: Rol del usuario
+      responses:
+        '200':
+          description: Nota actualizada exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Mensaje de éxito
+        '401':
+          description: Token inválido
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Mensaje de error
+        '404':
+          description: Nota no encontrada
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Mensaje de error
+        '500':
+          description: Error del servidor
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Mensaje de error del servidor
+  /api/borrar/noticia/{id}/{rol}:
+    delete:
+      tags:
+        - noticia
+      summary: Eliminar una nota por ID
+      description: Elimina una nota existente identificada por su ID.
+      parameters:
+        - in: path
+          name: id
+          description: ID de la nota que se va a eliminar
+          required: true
+          schema:
+            type: integer
+        - in: path
+          name: rol
+          description: Rol del usuario
+          required: true
+          schema:
+            type: string
+        - in: header
+          name: Authorization
+          description: Token de autorización JWT
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Nota eliminada exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Mensaje de éxito
+        '401':
+          description: Se requiere autorización
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Mensaje de error de autorización
+        '404':
+          description: Noticia no encontrada
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Mensaje de error
+        '500':
+          description: Error del servidor
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Mensaje de error del servidor
+  /api/noticia/{id}:
+    get:
+      tags:
+        - noticia
+      summary: Obtener una nota periodística por ID
+      description: >
+        Obtiene los detalles de una nota periodística específica por su ID, incluyendo sus imágenes, categoría, subcategoría y comentarios.
+      parameters:
+        - in: path
+          name: id
+          required: true
+          description: ID de la nota periodística que se va a obtener
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Detalles de la nota periodística encontrados con éxito
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  noticia:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        description: ID de la nota periodística.
+                      titulo:
+                        type: string
+                        description: Título de la nota periodística.
+                      descripcion:
+                        type: string
+                        description: Cuerpo de la nota periodística.
+                      categoria:
+                        type: object
+                        properties:
+                          id:
+                            type: integer
+                            description: ID de la categoría de la nota periodística.
+                          nombre:
+                            type: string
+                            description: Nombre de la categoría de la nota periodística.
+                      subcategoria:
+                        type: object
+                        properties:
+                          id:
+                            type: integer
+                            description: ID de la subcategoría de la nota periodística.
+                          nombre:
+                            type: string
+                            description: Nombre de la subcategoría de la nota periodística.
+                      items:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: integer
+                              description: ID del ítem asociado a la nota periodística.
+                            nombre:
+                              type: string
+                              description: Nombre del ítem asociado a la nota periodística.
+                      comentarios:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: integer
+                              description: ID del comentario.
+                            texto:
+                              type: string
+                              description: Texto del comentario.
+                            fecha:
+                              type: string
+                              format: date-time
+                              description: Fecha y hora del comentario.
+        '404':
+          description: Nota periodística no encontrada
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Mensaje de error indicando que la nota periodística no se encontró.
+        '500':
+          description: Error del servidor
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Mensaje de error del servidor.

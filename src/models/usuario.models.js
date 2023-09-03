@@ -1,9 +1,9 @@
-import { DataTypes } from "sequelize";
-import { sequelize } from "../database/database.js";
-import { Rol } from "./rol.models.js";
+import { DataTypes } from 'sequelize';
+import { sequelize } from '../database/database.js';
+import { Rol } from './rol.models.js';
 
 export const Usuarios = sequelize.define(
-  "usuarios",
+  'usuarios',
   {
     id: {
       type: DataTypes.INTEGER,
@@ -31,7 +31,7 @@ export const Usuarios = sequelize.define(
       allowNull: false,
       // defaultValue: "root",
     },
-     createdAt: {
+    createdAt: {
       type: DataTypes.DATEONLY, // Utiliza DataTypes.DATEONLY en lugar de DataTypes.DATE
       defaultValue: DataTypes.NOW, // Establece la fecha actual por defecto
     },
@@ -45,15 +45,13 @@ export const Usuarios = sequelize.define(
 
     // If don't want updatedAt
     updatedAt: false,
-  }
+  },
 );
 
 Usuarios.belongsTo(Rol, {
-  foreignKey: "rolID",
-  sourceKey: "id",
+  foreignKey: 'rolID',
+  sourceKey: 'id',
 });
-
-
 
 // Rol.hasMany(Usuarios, {
 //   foreignKey: "rolID",

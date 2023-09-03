@@ -1,4 +1,4 @@
-import { Router } from "express";
+import { Router } from 'express';
 import {
   ActualizarImagenes,
   ActualizarNota,
@@ -10,15 +10,24 @@ import {
   Notas,
   VerNotaAdministrador,
   VerNotaEscritor,
-} from "../controllers/noticia.controller.js";
-import { verifyToken } from "../middleware/verifyToken.js";
-import cors from "cors";
-import multer, { diskStorage } from "multer";
-import path, { dirname, join } from "path";
-import { fileURLToPath } from "url";
+  VerNotaFecha,
+} from '../controllers/noticia.controller.js';
+import { verifyToken } from '../middleware/verifyToken.js';
+import cors from 'cors';
+import multer, { diskStorage } from 'multer';
+import path, { dirname, join } from 'path';
+import { fileURLToPath } from 'url';
+import fs from 'fs';
 
 const CURRENT_DIR = dirname(fileURLToPath(import.meta.url));
-const union = join(CURRENT_DIR, "../uploads");
+const union = join(CURRENT_DIR, '../uploads');
+if (!fs.existsSync(union)) {
+  try {
+    fs.mkdirSync(union);
+  } catch (error) {
+    console.error('Error al crear la carpeta de destino:', error);
+  }
+}
 let uploads = multer({
   storage: diskStorage({
     destination: (req, file, cb) => {
@@ -27,47 +36,48 @@ let uploads = multer({
     filename: (req, file, cb) => {
       cb(
         null,
-        file.fieldname + "-" + Date.now() + path.extname(file.originalname)
+        file.fieldname + '-' + Date.now() + path.extname(file.originalname),
       );
     },
   }),
   fileFilter: (req, file, cb) => {
-    const filetypes = /jpeg|JPEG,|png|PNG|jpg|JPG|gif|avif/;
+    const filetypes = /jpeg|JPEG|png|PNG|jpg|JPG|gif|avif|jfif/;
     const mimetype = filetypes.test(file.mimetype);
     const extname = filetypes.test(path.extname(file.originalname));
     if (mimetype && extname) {
       return cb(null, true);
     }
-    cb("archivo no corresponde");
+    cb('archivo no corresponde');
   },
 });
 
 const router = Router();
 
 router.post(
-  "/api/registrar/nota",
+  '/api/registrar/nota',
   verifyToken,
-  uploads.array("images"),
+  uploads.array('images'),
   cors(),
-  CrearNota
+  CrearNota,
 );
-router.get("/api/noticias", cors(), Notas);
+router.get('/api/noticias', cors(), Notas);
 router.put(
-  "/api/actualizr/nota",
+  '/api/actualizar/nota/:id', // Define un parámetro de ruta para el ID
   verifyToken,
-  uploads.array("images"),
+  uploads.array('images'),
   cors(),
-  ActualizarNota
+  ActualizarNota,
 );
 router.post(
-  "/api/actualizar/imagen",
+  '/api/actualizar/imagen',
   verifyToken,
-  uploads.array("images"),
-  ActualizarImagenes
+  uploads.array('images'),
+  ActualizarImagenes,
 );
-router.delete("/api/borrar/noticia/:id/:rol", cors(), verifyToken, BorrarNota);
-router.get("/api/noticia/:id", cors(), Nota);
-router.get("/api/noticias/escritor", verifyToken, cors(), VerNotaEscritor);
-router.get("/api/buscar/nota",  cors(), FindNotaTitulo);
-router.get("/api/images", cors(), verifyToken, ListImageNota);
+router.delete('/api/borrar/noticia/:id/:rol', cors(), verifyToken, BorrarNota);
+router.get('/api/noticia/:id', cors(), Nota);
+router.get('/api/noticias/escritor/:rol', verifyToken, cors(), VerNotaEscritor);
+router.get('/api/noticias/fecha/:rol', verifyToken, cors(), VerNotaFecha);
+router.get('/api/buscar/nota', cors(), FindNotaTitulo);
+router.get('/api/images', cors(), verifyToken, ListImageNota);
 export default router;
