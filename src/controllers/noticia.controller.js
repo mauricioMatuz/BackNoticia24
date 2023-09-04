@@ -8,7 +8,7 @@ import { fileURLToPath } from 'url';
 import { Categoria } from '../models/categoria.models.js';
 import { SubCategoria } from '../models/subcategoria.models.js';
 import { Comentario } from '../models/comentarios.models.js';
-import { Op,literal } from 'sequelize';
+import { Op, literal } from 'sequelize';
 
 const eliminarArchivos = (archivos) => {
   archivos.forEach((archivo) => {
@@ -217,7 +217,7 @@ export const Notas = async (req, res) => {
         { model: Categoria },
         { model: SubCategoria },
       ],
-      order: [['id', 'ASC']],
+      order: [['createdAt', 'ASC']],
     });
     return res.status(200).json({ noticias });
   } catch (error) {
@@ -316,6 +316,31 @@ export const FindNotaTitulo = async (req, res) => {
       return res.status(404).json({ message: 'No se encontraron categorías' });
     }
     console.log(noticia.length);
+    return res.status(200).json({ noticia });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: 'Error en el servidor' });
+  }
+};
+
+export const FindNotaPorCategoria = async (req, res) => {
+  const { categoria } = req.query;
+  try {
+    const noticia = await Noticia.findAll({
+      where: { categoria }, // Modifica esto según cómo almacenes la categoría en tu base de datos
+      include: [
+        { model: Items },
+        { model: Categoria },
+        { model: SubCategoria },
+      ],
+    });
+
+    if (noticia.length === 0) {
+      return res
+        .status(404)
+        .json({ message: 'No se encontraron notas para esta categoría' });
+    }
+
     return res.status(200).json({ noticia });
   } catch (error) {
     console.log(error);

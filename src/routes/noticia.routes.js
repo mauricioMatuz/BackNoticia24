@@ -4,6 +4,7 @@ import {
   ActualizarNota,
   BorrarNota,
   CrearNota,
+  FindNotaPorCategoria,
   FindNotaTitulo,
   ListImageNota,
   Nota,
@@ -79,5 +80,6 @@ router.get('/api/noticia/:id', cors(), Nota);
 router.get('/api/noticias/escritor/:rol', verifyToken, cors(), VerNotaEscritor);
 router.get('/api/noticias/fecha/:rol', verifyToken, cors(), VerNotaFecha);
 router.get('/api/buscar/nota', cors(), FindNotaTitulo);
+router.get("/api/findby/categoria",cors(),FindNotaPorCategoria)
 router.get('/api/images', cors(), verifyToken, ListImageNota);
 export default router;
