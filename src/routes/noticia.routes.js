@@ -9,9 +9,10 @@ import {
   ListImageNota,
   Nota,
   Notas,
-  VerNotaAdministrador,
+  FindNotaPorCategoriaParam,
   VerNotaEscritor,
   VerNotaFecha,
+  Prueba,
 } from '../controllers/noticia.controller.js';
 import { verifyToken } from '../middleware/verifyToken.js';
 import cors from 'cors';
@@ -80,6 +81,8 @@ router.get('/api/noticia/:id', cors(), Nota);
 router.get('/api/noticias/escritor/:rol', verifyToken, cors(), VerNotaEscritor);
 router.get('/api/noticias/fecha/:rol', verifyToken, cors(), VerNotaFecha);
 router.get('/api/buscar/nota', cors(), FindNotaTitulo);
-router.get("/api/findby/categoria",cors(),FindNotaPorCategoria)
+router.get('/api/findby/categoria', cors(), FindNotaPorCategoria);
+router.get('/api/findby/:categoria', cors(), FindNotaPorCategoriaParam);
 router.get('/api/images', cors(), verifyToken, ListImageNota);
+router.get('/api/prueba/:fecha', cors(), Prueba);
 export default router;

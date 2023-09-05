@@ -217,7 +217,7 @@ export const Notas = async (req, res) => {
         { model: Categoria },
         { model: SubCategoria },
       ],
-      order: [['createdAt', 'ASC']],
+      order: [['createdAt', 'DESC']],
     });
     return res.status(200).json({ noticias });
   } catch (error) {
@@ -340,7 +340,65 @@ export const FindNotaPorCategoria = async (req, res) => {
         .status(404)
         .json({ message: 'No se encontraron notas para esta categoría' });
     }
+    console.log(noticia.length, ' tam');
+    return res.status(200).json({ noticia });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: 'Error en el servidor' });
+  }
+};
+export const FindNotaPorCategoriaParam = async (req, res) => {
+  const { categoria } = req.params;
+  console.log(categoria, ' params');
+  try {
+    const categoriaEncontrada = await Categoria.findOne({
+      where: {
+        categoria, // Esto busca por nombre de categoría
+      },
+    });
+    if (!categoriaEncontrada) {
+      return res.status(404).json({ message: 'cantegoria no disponible' });
+    }
+    const categoriaId = categoriaEncontrada.id;
+    console.log(categoriaId);
+    const noticia = await Noticia.findAll({
+      where: { categoriaID: categoriaId }, // Modifica esto según cómo almacenes la categoría en tu base de datos
+      include: [
+        { model: Items },
+        { model: Categoria },
+        { model: SubCategoria },
+      ],
+    });
+    if (noticia.length === 0) {
+      return res
+        .status(404)
+        .json({ message: 'No se encontraron notas para esta categoría' });
+    }
+    console.log(' esto jalo ', noticia.length);
+    return res.status(200).json({ noticia });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: 'Error en el servidor' });
+  }
+};
 
+export const Prueba = async (req, res) => {
+  console.log('sisi');
+  const { fecha } = req.params;
+  try {
+    console.log(fecha, ' date');
+    const noticia = await Noticia.findAll({
+      where: { createdAt }, // Convierte a minúsculas antes de comparar
+      include: [
+        { model: Items },
+        { model: Categoria },
+        { model: SubCategoria },
+      ],
+    });
+    if (noticia.length === 0) {
+      return res.status(404).json({ message: 'No se encontraron categorías' });
+    }
+    console.log(noticia.length);
     return res.status(200).json({ noticia });
   } catch (error) {
     console.log(error);
