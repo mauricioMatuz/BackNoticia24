@@ -52,7 +52,7 @@ export const BorrarSubCategoria = async (req, res) => {
     }
     await SubCategoria.destroy({ where: { id } });
     await t.commit();
-    return res.status(204).send();
+    return res.status(200).json({ message: "Subcategoria borrada exitosamente" });
   } catch (error) {
     await t.rollback();
     return res.status(500).json('ERROR SERVIDOR');
