@@ -27,6 +27,7 @@ export const CrearCategoria = async (req, res) => {
 };
 export const ActualizarCategoria = async (req, res) => {
   console.log("Entra a actualizar categoria");
+  
   const t = await sequelize.transaction();
   try {
     const { id,Nuevacategoria } = req.body;
@@ -41,11 +42,15 @@ export const ActualizarCategoria = async (req, res) => {
     });
     if (categoria) {
       console.log("Dentro del if:",req.body);
-      await categoria.update({ Nuevacategoria });
+      const updatedCategoria = await categoria.update(req.body);
+      //await categoria.update(req.body);
       await t.commit();
       return res
         .status(200)
-        .json({ message: 'Categoría actualizada exitosamente' });
+        .json({
+          message: "Categoría actualizada exitosamente",
+          updatedCategoria,
+        });
     } else {
       return res.status(404).json({ message: 'Categoría no encontrada' });
     }
