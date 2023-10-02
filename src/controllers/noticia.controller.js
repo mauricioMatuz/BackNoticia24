@@ -188,7 +188,7 @@ export const BorrarNota = async (req, res) => {
 export const Nota = async (req, res) => {
   try {
     const id = req.params.id;
-
+    console.log(id, 'Params');
     const noticia = await Noticia.findOne({
       where: { id },
       include: [
@@ -200,6 +200,7 @@ export const Nota = async (req, res) => {
     });
 
     if (noticia) {
+      console.log('entro si tengo nota');
       return res.status(200).json({ noticia });
     } else {
       return res.status(404).json({ message: 'Noticia no encontrada' });
