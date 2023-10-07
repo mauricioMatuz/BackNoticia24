@@ -1,15 +1,15 @@
-import { sequelize } from "../database/database.js";
-import { Noticia } from "../models/noticia.models.js";
-import jwt from "jsonwebtoken";
-import fs from "fs";
-import { Items } from "../models/item.models.js";
-import path, { dirname, join } from "path";
-import { fileURLToPath } from "url";
-import { Categoria } from "../models/categoria.models.js";
-import { SubCategoria } from "../models/subcategoria.models.js";
-import { Comentario } from "../models/comentarios.models.js";
-import { Op, literal } from "sequelize";
-import { log } from "console";
+import { sequelize } from '../database/database.js';
+import { Noticia } from '../models/noticia.models.js';
+import jwt from 'jsonwebtoken';
+import fs from 'fs';
+import { Items } from '../models/item.models.js';
+import path, { dirname, join } from 'path';
+import { fileURLToPath } from 'url';
+import { Categoria } from '../models/categoria.models.js';
+import { SubCategoria } from '../models/subcategoria.models.js';
+import { Comentario } from '../models/comentarios.models.js';
+import { Op, literal } from 'sequelize';
+import { log } from 'console';
 
 const eliminarArchivos = (archivos) => {
   archivos.forEach((archivo) => {
@@ -26,7 +26,7 @@ export const CrearNota = async (req, res, next) => {
     try {
       decodedToken = jwt.verify(req.token, rol);
     } catch (error) {
-      return res.status(403).json({ message: "Error token" });
+      return res.status(403).json({ message: 'Error token' });
     }
     const noticia = await Noticia.create(
       {
@@ -34,9 +34,9 @@ export const CrearNota = async (req, res, next) => {
         descripcion,
         categoriaID,
         subcategoriaID,
-        autor: decodedToken.user.nombre + " " + decodedToken.user.apellido,
+        autor: decodedToken.user.nombre + ' ' + decodedToken.user.apellido,
       },
-      { transaction: t }
+      { transaction: t },
     );
 
     if (!files) {
@@ -47,21 +47,21 @@ export const CrearNota = async (req, res, next) => {
           await Items.create(
             {
               nombre: file.originalname,
-              path: "http://localhost:8080/" + file.filename,
+              path: 'http://localhost:8080/' + file.filename,
               noticiaID: noticia.id,
             },
-            { transaction: t }
+            { transaction: t },
           );
-        })
+        }),
       );
     }
 
     await t.commit();
-    return res.status(201).json({ message: "Nota creada" });
+    return res.status(201).json({ message: 'Nota creada' });
   } catch (error) {
     await t.rollback();
     if (req.files) eliminarArchivos(req.files);
-    return res.status(500).json({ message: "Error del servidor" });
+    return res.status(500).json({ message: 'Error del servidor' });
   }
 };
 
@@ -71,11 +71,11 @@ export const ListImageNota = async (req, res) => {
     try {
       const decodedToken = jwt.verify(req.token, rol);
     } catch (error) {
-      return res.status(401).json({ message: "Token inválido" });
+      return res.status(401).json({ message: 'Token inválido' });
     }
     const noticia = await Noticia.findOne({ where: { id } });
     if (!noticia) {
-      return res.status(404).json({ message: "No se encontró la nota" });
+      return res.status(404).json({ message: 'No se encontró la nota' });
     } else {
       const item = await Items.findOne({ where: { noticiaID: id } });
       return res.status(200).json({ message: item });
@@ -91,27 +91,27 @@ export const ActualizarImagenes = async (req, res) => {
     try {
       const decodedToken = jwt.verify(req.token, rol);
     } catch (error) {
-      return res.status(401).json({ message: "Token inválido" });
+      return res.status(401).json({ message: 'Token inválido' });
     }
     const noticia = await Noticia.findOne({ where: { id } });
     if (!noticia) {
-      return res.status(404).json({ message: "No se encontró la nota" });
+      return res.status(404).json({ message: 'No se encontró la nota' });
     } else {
       await Items.destroy({ where: { noticiaID: id }, transaction: t });
       const newItems = files.map((file) => {
         return {
           nombre: file.originalname,
-          path: "http://localhost:8080/" + file.filename,
+          path: 'http://localhost:8080/' + file.filename,
           noticiaID: id,
         };
       });
       await Items.bulkCreate(newItems, { transaction: t });
       await t.commit();
-      return res.status(200).json({ message: "Imágenes actualizadas" });
+      return res.status(200).json({ message: 'Imágenes actualizadas' });
     }
   } catch (error) {
     await t.rollback();
-    return res.status(500).json({ message: "Error del servidor" });
+    return res.status(500).json({ message: 'Error del servidor' });
   }
 };
 
@@ -124,11 +124,11 @@ export const ActualizarNota = async (req, res) => {
     try {
       const decodedToken = jwt.verify(req.token, rol);
     } catch (error) {
-      return res.status(401).json({ message: "Token inválido" });
+      return res.status(401).json({ message: 'Token inválido' });
     }
     const noticia = await Noticia.findOne({ where: { id } });
     if (!noticia) {
-      return res.status(404).json({ message: "No se encontró la nota" });
+      return res.status(404).json({ message: 'No se encontró la nota' });
     } else {
       noticia.set(req.body);
 
@@ -141,7 +141,7 @@ export const ActualizarNota = async (req, res) => {
         const newItems = files.map((file) => {
           return {
             nombre: file.originalname,
-            path: "http://localhost:8080/" + file.filename,
+            path: 'http://localhost:8080/' + file.filename,
             noticiaID: id,
           };
         });
@@ -154,10 +154,10 @@ export const ActualizarNota = async (req, res) => {
       }
     }
     await t.commit();
-    return res.status(200).json({ message: "Nota actualizada" });
+    return res.status(200).json({ message: 'Nota actualizada' });
   } catch (error) {
     await t.rollback();
-    return res.status(500).json({ message: "Error del servidor" });
+    return res.status(500).json({ message: 'Error del servidor' });
   }
 };
 
@@ -169,19 +169,19 @@ export const BorrarNota = async (req, res) => {
     try {
       jwt.verify(req.token, rol);
     } catch (error) {
-      return res.status(401).json({ message: "Se requiere autorización" });
+      return res.status(401).json({ message: 'Se requiere autorización' });
     }
     const noticia = await Noticia.findOne({ where: { id }, transaction: t });
     if (!noticia) {
-      return res.status(404).json({ message: "Noticia no encontrada" });
+      return res.status(404).json({ message: 'Noticia no encontrada' });
     }
     await Noticia.destroy({ where: { id }, transaction: t });
 
     await t.commit();
-    return res.status(200).json({ message: "Noticia eliminada" });
+    return res.status(200).json({ message: 'Noticia eliminada' });
   } catch (error) {
     await t.rollback();
-    return res.status(500).json({ message: "Error Servidor" });
+    return res.status(500).json({ message: 'Error Servidor' });
   }
 };
 
@@ -203,10 +203,10 @@ export const Nota = async (req, res) => {
       console.log('entro si tengo nota');
       return res.status(200).json({ noticia });
     } else {
-      return res.status(404).json({ message: "Noticia no encontrada" });
+      return res.status(404).json({ message: 'Noticia no encontrada' });
     }
   } catch (error) {
-    return res.status(500).json({ message: "Error del servidor" });
+    return res.status(500).json({ message: 'Error del servidor' });
   }
 };
 
@@ -218,11 +218,11 @@ export const Notas = async (req, res) => {
         { model: Categoria },
         { model: SubCategoria },
       ],
-      order: [["createdAt", "DESC"]],
+      order: [['createdAt', 'DESC']],
     });
     return res.status(200).json({ noticias });
   } catch (error) {
-    return res.status(500).json({ message: "Error del servidor" });
+    return res.status(500).json({ message: 'Error del servidor' });
   }
 };
 
@@ -233,7 +233,7 @@ export const VerNotaEscritor = async (req, res) => {
       const decodedToken = jwt.verify(req.token, rol);
       const noticia = await Noticia.findAll({
         where: {
-          autor: decodedToken.user.nombre + " " + decodedToken.user.apellido,
+          autor: decodedToken.user.nombre + ' ' + decodedToken.user.apellido,
         },
         include: [
           { model: Items },
@@ -243,10 +243,10 @@ export const VerNotaEscritor = async (req, res) => {
       });
       return res.status(200).json({ noticia });
     } catch (error) {
-      return res.status(401).json({ message: "Token inválido" });
+      return res.status(401).json({ message: 'Token inválido' });
     }
   } catch (error) {
-    return res.status(500).json({ message: "Error del servidor" });
+    return res.status(500).json({ message: 'Error del servidor' });
   }
 };
 
@@ -257,30 +257,30 @@ export const VerNotaFecha = async (req, res) => {
       const decodedToken = jwt.verify(req.token, rol);
       const noticias = await Noticia.findAll({
         where: {
-          autor: decodedToken.user.nombre + " " + decodedToken.user.apellido,
+          autor: decodedToken.user.nombre + ' ' + decodedToken.user.apellido,
         },
         include: [
           { model: Items },
           { model: Categoria },
           { model: SubCategoria },
         ],
-        order: [["createdAt", "ASC"]], // Ordenar por fecha en orden ascendente
+        order: [['createdAt', 'ASC']], // Ordenar por fecha en orden ascendente
       });
       return res.status(200).json({ noticias });
     } catch (error) {
-      return res.status(401).json({ message: "Token inválido" });
+      return res.status(401).json({ message: 'Token inválido' });
     }
   } catch (error) {
-    return res.status(500).json({ message: "Error del servidor" });
+    return res.status(500).json({ message: 'Error del servidor' });
   }
 };
 export const VerNotaAdministrador = async (req, res) => {
   try {
     try {
-      const decodedToken = jwt.verify(req.token, "administrador");
+      const decodedToken = jwt.verify(req.token, 'administrador');
       const noticia = await Noticia.findAll({
         where: {
-          autor: decodedToken.user.nombre + " " + decodedToken.user.apellido,
+          autor: decodedToken.user.nombre + ' ' + decodedToken.user.apellido,
         },
         include: [
           { model: Items },
@@ -290,10 +290,10 @@ export const VerNotaAdministrador = async (req, res) => {
       });
       return res.status(200).json({ noticia });
     } catch (error) {
-      return res.status(401).json({ message: "Token inválido" });
+      return res.status(401).json({ message: 'Token inválido' });
     }
   } catch (error) {
-    return res.status(500).json({ message: "Error del servidor" });
+    return res.status(500).json({ message: 'Error del servidor' });
   }
 };
 
@@ -310,11 +310,11 @@ export const FindNotaTitulo = async (req, res) => {
       ],
     });
     if (noticia.length === 0) {
-      return res.status(404).json({ message: "No se encontraron categorías" });
+      return res.status(404).json({ message: 'No se encontraron categorías' });
     }
     return res.status(200).json({ noticia });
   } catch (error) {
-    res.status(500).json({ message: "Error en el servidor" });
+    res.status(500).json({ message: 'Error en el servidor' });
   }
 };
 
@@ -333,13 +333,14 @@ export const FindNotaPorCategoria = async (req, res) => {
     if (noticia.length === 0) {
       return res
         .status(404)
-        .json({ message: "No se encontraron notas para esta categoría" });
+        .json({ message: 'No se encontraron notas para esta categoría' });
     }
     return res.status(200).json({ noticia });
   } catch (error) {
-    res.status(500).json({ message: "Error en el servidor" });
+    res.status(500).json({ message: 'Error en el servidor' });
   }
 };
+
 export const FindNotaPorCategoriaParam = async (req, res) => {
   const { categoria } = req.params;
   try {
@@ -349,7 +350,7 @@ export const FindNotaPorCategoriaParam = async (req, res) => {
       },
     });
     if (!categoriaEncontrada) {
-      return res.status(404).json({ message: "cantegoria no disponible" });
+      return res.status(404).json({ message: 'cantegoria no disponible' });
     }
     const categoriaId = categoriaEncontrada.id;
     const noticia = await Noticia.findAll({
@@ -363,11 +364,11 @@ export const FindNotaPorCategoriaParam = async (req, res) => {
     if (noticia.length === 0) {
       return res
         .status(404)
-        .json({ message: "No se encontraron notas para esta categoría" });
+        .json({ message: 'No se encontraron notas para esta categoría' });
     }
     return res.status(200).json({ noticia });
   } catch (error) {
-    res.status(500).json({ message: "Error en el servidor" });
+    res.status(500).json({ message: 'Error en el servidor' });
   }
 };
 
@@ -383,10 +384,91 @@ export const Prueba = async (req, res) => {
       ],
     });
     if (noticia.length === 0) {
-      return res.status(404).json({ message: "No se encontraron categorías" });
+      return res.status(404).json({ message: 'No se encontraron categorías' });
     }
     return res.status(200).json({ noticia });
   } catch (error) {
-    res.status(500).json({ message: "Error en el servidor" });
+    res.status(500).json({ message: 'Error en el servidor' });
+  }
+};
+
+export const Search = async (req, res) => {
+  try {
+    const { buscar } = req.params;
+    console.log(buscar, ' parametro');
+    // Búsqueda por categoría
+    const categoriaEncontrada = await Categoria.findOne({
+      where: {
+        categoria: {
+          [Op.iLike]: `%${buscar}%`, // Utilizamos Op.iLike para búsqueda insensible a mayúsculas y minúsculas
+        },
+      },
+    });
+
+    if (categoriaEncontrada) {
+      const categoriaId = categoriaEncontrada.id;
+      const noticias = await Noticia.findAll({
+        where: { categoriaID: categoriaId },
+        include: [
+          { model: Items },
+          { model: Categoria },
+          { model: SubCategoria },
+        ],
+      });
+
+      if (noticias.length > 0) {
+        return res.status(200).json({ noticias });
+      }
+    }
+
+    // Búsqueda por subcategoría
+    const subCategoriaEncontrada = await SubCategoria.findOne({
+      where: {
+        subcategoria: {
+          [Op.iLike]: `%${buscar}%`, // Utilizamos Op.iLike para búsqueda insensible a mayúsculas y minúsculas
+        },
+      },
+    });
+
+    if (subCategoriaEncontrada) {
+      const subCategoriaId = subCategoriaEncontrada.id;
+      const noticias = await Noticia.findAll({
+        where: { subcategoriaID: subCategoriaId },
+        include: [
+          { model: Items },
+          { model: Categoria },
+          { model: SubCategoria },
+        ],
+      });
+
+      if (noticias.length > 0) {
+        return res.status(200).json({ noticias });
+      }
+    }
+
+    // Búsqueda por título de la nota
+    const noticiasPorTitulo = await Noticia.findAll({
+      where: {
+        titulo: {
+          [Op.iLike]: `%${buscar}%`, // Utilizamos Op.iLike para búsqueda insensible a mayúsculas y minúsculas
+        },
+      },
+      include: [
+        { model: Items },
+        { model: Categoria },
+        { model: SubCategoria },
+      ],
+    });
+
+    if (noticiasPorTitulo.length > 0) {
+      return res.status(200).json({ noticias: noticiasPorTitulo });
+    }
+
+    // Si no se encontraron resultados
+    return res
+      .status(404)
+      .json({ message: 'No se encontraron resultados para la búsqueda.' });
+  } catch (error) {
+    res.status(500).json({ message: 'Error en el servidor' });
   }
 };

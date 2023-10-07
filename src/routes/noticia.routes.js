@@ -13,6 +13,7 @@ import {
   VerNotaEscritor,
   VerNotaFecha,
   Prueba,
+  Search,
 } from '../controllers/noticia.controller.js';
 import { verifyToken } from '../middleware/verifyToken.js';
 import cors from 'cors';
@@ -84,5 +85,6 @@ router.get('/api/buscar/nota', cors(), FindNotaTitulo);
 router.get('/api/findby/categoria', cors(), FindNotaPorCategoria);
 router.get('/api/findby/:categoria', cors(), FindNotaPorCategoriaParam);
 router.get('/api/images', cors(), verifyToken, ListImageNota);
-router.get('/api/prueba/:fecha', cors(), Prueba);
+router.get('/api/fecha/:fecha', cors(), Prueba);
+router.get('/api/buscar/:buscar', cors(), Search);
 export default router;
